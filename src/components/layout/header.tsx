@@ -7,9 +7,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import LeftSidebarContent from './left-sidebar-content';
+// Uvozimo novi tip koji smo napravili u left-sidebar.tsx
+import type { SportWithCount } from './left-sidebar';
 
 interface HeaderProps {
-  sports: string[];
+  sports: SportWithCount[];
 }
 
 export default function Header({ sports }: HeaderProps) {
@@ -28,6 +30,7 @@ export default function Header({ sports }: HeaderProps) {
               <SheetHeader>
                 <SheetTitle className="sr-only">Navigation</SheetTitle>
               </SheetHeader>
+              {/* Prosleđujemo ceo objekat sa imenom i brojem u mobilni meni */}
               <LeftSidebarContent sports={sports} />
             </SheetContent>
           </Sheet>

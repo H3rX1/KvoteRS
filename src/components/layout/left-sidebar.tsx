@@ -1,7 +1,13 @@
 import LeftSidebarContent from './left-sidebar-content';
 
+// Definišemo novi tip koji sadrži i broj mečeva
+export interface SportWithCount {
+  name: string;
+  count: number;
+}
+
 interface LeftSidebarProps {
-  sports: string[];
+  sports: SportWithCount[];
 }
 
 export default function LeftSidebar({ sports }: LeftSidebarProps) {
