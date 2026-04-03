@@ -31,6 +31,17 @@ export interface MatchWithOdds {
   all_odds: OddEntity[]; // Contains all 13 possible bookie odds for this match
 }
 
+// New interfaces for Countries and Leagues hierarchy
+export interface LeagueBasic {
+  id: string;
+  name: string;
+}
+
+export interface CountryWithLeagues {
+  name: string;
+  leagues: LeagueBasic[];
+}
+
 // --- Fetching Logic --- //
 
 /**
@@ -60,6 +71,32 @@ export async function getMatchesWithGroupedOdds(): Promise<MatchWithOdds[]> {
 
     // In a production Next.js app, you might want to return a specific standard error 
     // format rather than an empty array, depending on your UI handling.
+    return [];
+  }
+}
+
+/**
+ * Fetches countries and their associated leagues.
+ * Returns a grouped array structure: [{ name: 'Country', leagues: [{ id, name }] }]
+ */
+export async function getLeaguesGroupedByCountry(): Promise<CountryWithLeagues[]> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_leagues_grouped_by_country');
+
+    if (error) {
+      console.error('Supabase RPC Error fetching grouped leagues:', error.message, error.details);
+      throw new Error(`Failed to fetch grouped leagues: ${error.message}`);
+    }
+
+    return data as CountryWithLeagues[];
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error('Unexpected error in getLeaguesGroupedByCountry:', err.message);
+    } else {
+      console.error('An unknown error occurred:', err);
+    }
+
     return [];
   }
 }
