@@ -35,6 +35,7 @@ export interface MatchWithOdds {
 export interface LeagueBasic {
   id: string;
   name: string;
+  slug: string; // <-- DODALI SMO OVO
 }
 
 export interface CountryWithLeagues {
@@ -71,6 +72,31 @@ export async function getMatchesWithGroupedOdds(): Promise<MatchWithOdds[]> {
 
     // In a production Next.js app, you might want to return a specific standard error 
     // format rather than an empty array, depending on your UI handling.
+    return [];
+  }
+}
+
+
+/**
+ * Fetches up to 50 upcoming matches filtered by a specific league slug.
+ */
+export async function getMatchesWithGroupedOddsByLeague(leagueSlug: string): Promise<MatchWithOdds[]> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_grouped_matches_with_odds_by_league', { p_league_slug: leagueSlug });
+
+    if (error) {
+      console.error('Supabase RPC Error fetching matches by league:', error.message, error.details);
+      throw new Error(`Failed to fetch matches by league: ${error.message}`);
+    }
+
+    return data as MatchWithOdds[];
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error('Unexpected error in getMatchesWithGroupedOddsByLeague:', err.message);
+    } else {
+      console.error('An unknown error occurred:', err);
+    }
     return [];
   }
 }

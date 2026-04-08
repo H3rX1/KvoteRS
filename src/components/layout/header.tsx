@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link'; // <-- Dodali smo import za Link
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -9,7 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Activity, Menu } from 'lucide-react';
+import { Activity, Menu, Home } from 'lucide-react'; // <-- Dodali smo Home ikonicu
 
 // Import the unified SidebarContent and Type from left-sidebar
 import { SidebarContent, type SportWithCount } from './left-sidebar';
@@ -50,12 +51,28 @@ export default function Header({ sports }: HeaderProps) {
           </Sheet>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-3xl">📈</span>
-          <h1 className="font-headline text-2xl font-bold uppercase tracking-wider text-primary">
-            KvoteRS
-          </h1>
+        {/* --- IZMENJEN DEO: Logo i dugme --- */}
+        <div className="flex items-center gap-6">
+
+          {/* 1. Klik na logo sada vodi na početnu stranu */}
+          <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+            <span className="text-3xl">📈</span>
+            <h1 className="font-headline text-2xl font-bold uppercase tracking-wider text-primary">
+              KvoteRS
+            </h1>
+          </Link>
+
+          {/* 2. Eksplicitno dugme za sve mečeve */}
+          <Link href="/">
+            <Button variant="secondary" size="sm" className="hidden sm:flex font-semibold tracking-wide">
+              <Home className="w-4 h-4 mr-2" />
+              SVI MEČEVI
+            </Button>
+          </Link>
+
         </div>
+        {/* --- KRAJ IZMENJENOG DELA --- */}
+
       </div>
     </header>
   );

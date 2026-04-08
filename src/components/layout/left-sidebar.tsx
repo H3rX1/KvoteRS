@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { ChevronDown, Trophy, Activity, Globe } from 'lucide-react';
+import Link from 'next/link';
 
 export interface League {
   id: string;
   name: string;
+  slug: string;
 }
 
 export interface Country {
@@ -117,13 +119,13 @@ export function SidebarContent({ sports, onLinkClick }: SidebarContentProps) {
                                 {country.leagues && country.leagues.length > 0 ? (
                                   country.leagues.map((league) => (
                                     <li key={league.id}>
-                                      <a
-                                        href={`#${league.id}`}
+                                      <Link
+                                        href={`/?league=${league.slug}`}
                                         onClick={() => onLinkClick?.()}
                                         className="flex justify-between items-center text-xs text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 py-1.5 px-2 rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                                       >
                                         <span className="truncate">{league.name}</span>
-                                      </a>
+                                      </Link>
                                     </li>
                                   ))
                                 ) : (
