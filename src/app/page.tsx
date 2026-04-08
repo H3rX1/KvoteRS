@@ -12,7 +12,7 @@ import {
 // Prilagodi putanju ako se nalazi u drugom folderu (npr. '@/lib/supabase').
 import {
   getMatchesWithGroupedOdds,
-  getLeaguesGroupedByCountry,
+  getActiveLeaguesGroupedByCountry,
   type MatchWithOdds
 } from '@/lib/supabase';
 
@@ -20,7 +20,7 @@ export default async function Home() {
   // Povlačimo podatke paralelno za bolje performanse
   const [matches, countriesData] = await Promise.all([
     getMatchesWithGroupedOdds(),
-    getLeaguesGroupedByCountry()
+    getActiveLeaguesGroupedByCountry()
   ]);
 
   // Izvlačimo jedinstvene sportove iz dobijenih mečeva

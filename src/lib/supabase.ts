@@ -100,3 +100,25 @@ export async function getLeaguesGroupedByCountry(): Promise<CountryWithLeagues[]
     return [];
   }
 }
+
+export async function getActiveLeaguesGroupedByCountry(): Promise<CountryWithLeagues[]> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_active_leagues_grouped_by_country');
+
+    if (error) {
+      console.error('Supabase RPC Error fetching active grouped leagues:', error.message, error.details);
+      throw new Error(`Failed to fetch active grouped leagues: ${error.message}`);
+    }
+
+    return data as CountryWithLeagues[];
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error('Unexpected error in getActiveLeaguesGroupedByCountry:', err.message);
+    } else {
+      console.error('An unknown error occurred:', err);
+    }
+
+    return [];
+  }
+}
