@@ -17,10 +17,13 @@ import { SidebarContent, type SportWithCount } from './left-sidebar';
 
 interface HeaderProps {
   sports: SportWithCount[];
+  currentLeague?: string;
 }
 
-export default function Header({ sports }: HeaderProps) {
+export default function Header({ sports, currentLeague }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+
 
   return (
     <header className="sticky top-0 z-10 flex h-20 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -45,7 +48,7 @@ export default function Header({ sports }: HeaderProps) {
               </SheetHeader>
               <div className="flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {/* Reusing the exact same SidebarContent. Passing onLinkClick to close Sheet on selection */}
-                <SidebarContent sports={sports} onLinkClick={() => setIsOpen(false)} />
+                <SidebarContent sports={sports} onLinkClick={() => setIsOpen(false)} currentLeague={currentLeague} />
               </div>
             </SheetContent>
           </Sheet>

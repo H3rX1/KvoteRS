@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import Link from 'next/link'; // Dodat Link
 
 interface MatchCardProps {
   match: MatchWithOdds;
@@ -33,15 +34,28 @@ function getBestOdds(match: MatchWithOdds) {
   return bestOdds;
 }
 
+// Funkcija za generisanje SEO-friendly URL-a
+function generateMatchUrl(match: MatchWithOdds) {
+  // Pretvara "Crvena Zvezda" u "crvena-zvezda"
+  const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+  const homeSlug = slugify(match.home_team);
+  const awaySlug = slugify(match.away_team);
+  const sportSlug = slugify(match.sport || 'sport');
+
+  // Format: /fudbal/match/crvena-zvezda-partizan-s_12345
+  return `/${sportSlug}/match/${homeSlug}-${awaySlug}-${match.id}`;
+}
+
 export default function MatchCard({ match }: MatchCardProps) {
   const bestOdds = getBestOdds(match);
+  const sportSlug = match.sport ? match.sport.toLowerCase() : 'sport';
+  const matchUrl = `/${sportSlug}/match/${match.slug}`;
 
-  // Logika koja bira 3 kladionice tako da obavezno uključi one sa najboljim kvotama
   const displayedOdds = (() => {
     const selectedBookies: typeof match.all_odds = [];
     const seenNames = new Set<string>();
 
-    // Funkcija za dodavanje kladionice ako ima najbolju kvotu za specifičan ishod
     const addBestBookie = (key: 'odd_1' | 'odd_x' | 'odd_2') => {
       const bestBookie = match.all_odds.find(
         (o) => o[key] !== null && o[key] === bestOdds[key]
@@ -52,13 +66,10 @@ export default function MatchCard({ match }: MatchCardProps) {
       }
     };
 
-    // Pokušavamo da nađemo i dodamo pobednike za sva tri ishoda
     addBestBookie('odd_1');
     addBestBookie('odd_x');
     addBestBookie('odd_2');
 
-    // Ukoliko nemamo 3 kladionice (npr. jedna kladionica ima najbolje kvote za više ishoda),
-    // popunjavamo listu do 3 sa ostalim dostupnim kladionicama
     for (const odd of match.all_odds) {
       if (selectedBookies.length >= 3) break;
       if (!seenNames.has(odd.bookie_name)) {
@@ -67,15 +78,18 @@ export default function MatchCard({ match }: MatchCardProps) {
       }
     }
 
-    return selectedBookies.slice(0, 3); // Osiguravamo maksimum 3
+    return selectedBookies.slice(0, 3);
   })();
 
   return (
     <Card className="overflow-hidden border-border/50">
       <CardHeader>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="text-xl text-foreground">
-            {match.home_team} vs {match.away_team}
+          <CardTitle className="text-xl text-foreground hover:text-primary transition-colors">
+            {/* Dodat Link oko imena timova */}
+            <Link href={matchUrl}>
+              {match.home_team} vs {match.away_team}
+            </Link>
           </CardTitle>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>🕒</span>
@@ -91,9 +105,7 @@ export default function MatchCard({ match }: MatchCardProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[120px] sm:w-[150px]">
-                  Bookmaker
-                </TableHead>
+                <TableHead className="w-[120px] sm:w-[150px]">Bookmaker</TableHead>
                 <TableHead className="text-center">1</TableHead>
                 <TableHead className="text-center">X</TableHead>
                 <TableHead className="text-center">2</TableHead>
@@ -106,31 +118,13 @@ export default function MatchCard({ match }: MatchCardProps) {
                     {oddEntry.bookie_name}
                   </TableCell>
                   <TableCell className="text-center">
-                    <OddDisplay
-                      odd={oddEntry.odd_1}
-                      isBest={
-                        oddEntry.odd_1 !== null &&
-                        oddEntry.odd_1 === bestOdds.odd_1
-                      }
-                    />
+                    <OddDisplay odd={oddEntry.odd_1} isBest={oddEntry.odd_1 !== null && oddEntry.odd_1 === bestOdds.odd_1} />
                   </TableCell>
                   <TableCell className="text-center">
-                    <OddDisplay
-                      odd={oddEntry.odd_x}
-                      isBest={
-                        oddEntry.odd_x !== null &&
-                        oddEntry.odd_x === bestOdds.odd_x
-                      }
-                    />
+                    <OddDisplay odd={oddEntry.odd_x} isBest={oddEntry.odd_x !== null && oddEntry.odd_x === bestOdds.odd_x} />
                   </TableCell>
                   <TableCell className="text-center">
-                    <OddDisplay
-                      odd={oddEntry.odd_2}
-                      isBest={
-                        oddEntry.odd_2 !== null &&
-                        oddEntry.odd_2 === bestOdds.odd_2
-                      }
-                    />
+                    <OddDisplay odd={oddEntry.odd_2} isBest={oddEntry.odd_2 !== null && oddEntry.odd_2 === bestOdds.odd_2} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -149,9 +143,7 @@ const OddDisplay = ({ odd, isBest }: { odd: number | null; isBest: boolean }) =>
     <div
       className={cn(
         'inline-block rounded-md px-2 py-1 text-sm font-bold tabular-nums transition-colors',
-        isBest
-          ? 'bg-best-odds-green/10 text-best-odds-green'
-          : 'text-foreground/80'
+        isBest ? 'bg-best-odds-green/10 text-best-odds-green' : 'text-foreground/80'
       )}
     >
       {odd.toFixed(2)}

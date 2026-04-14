@@ -10,33 +10,35 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-// Prilagodi putanju ako se nalazi u drugom folderu (npr. '@/lib/supabase').
 import {
   getMatchesWithGroupedOdds,
-  getMatchesWithGroupedOddsByLeague, // <-- Uvozimo novu funkciju
+  getMatchesWithGroupedOddsByLeague,
   getActiveLeaguesGroupedByCountry,
   type MatchWithOdds
 } from '@/lib/supabase';
 
-// 1. Dodajemo interfejs da bismo mogli da čitamo URL parametre (Next.js Server Component)
+// 1. IZMENA: U Next.js 15, searchParams je Promise
 interface HomeProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 // 2. Dodajemo searchParams kao argument
 export default async function Home({ searchParams }: HomeProps) {
 
-  // Čitamo slug lige iz URL-a (biće undefined na početnoj strani)
-  const leagueSlug = searchParams.league as string | undefined;
+  // 3. IZMENA: Moramo da "otpakujemo" Promise koristeći await
+  const resolvedParams = await searchParams;
 
-  // 3. Dinamički biramo koju funkciju zovemo na osnovu toga da li imamo slug
+  // Tek sada možemo bezbedno da pročitamo ligu
+  const leagueSlug = resolvedParams.league as string | undefined;
+
+  // Dinamički biramo koju funkciju zovemo na osnovu toga da li imamo slug
   const fetchMatches = leagueSlug
     ? getMatchesWithGroupedOddsByLeague(leagueSlug)
     : getMatchesWithGroupedOdds();
 
   // Povlačimo podatke paralelno za bolje performanse
   const [matches, countriesData] = await Promise.all([
-    fetchMatches, // <-- Ovde se izvršava odabrana funkcija
+    fetchMatches,
     getActiveLeaguesGroupedByCountry()
   ]);
 
@@ -57,16 +59,15 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
-      <Header sports={sportsWithCounts} />
+      <Header sports={sportsWithCounts} currentLeague={leagueSlug} />
 
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[360px_1fr] xl:grid-cols-[360px_1fr_320px]">
 
-        <LeftSidebar sports={sportsWithCounts} />
+        <LeftSidebar sports={sportsWithCounts} currentLeague={leagueSlug} />
 
         <main className="flex-1 min-w-0">
           <ScrollArea className="h-[calc(100vh-80px)] p-4 md:p-6 lg:p-8">
             <div className="grid gap-6">
-              {/* Dodali smo proveru ako je niz prazan da pokaže poruku */}
               {matches.length > 0 ? (
                 matches.map((match: MatchWithOdds) => (
                   <MatchCard key={match.id} match={match as any} />

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, Trophy, Activity, Globe } from 'lucide-react';
 import Link from 'next/link';
 
@@ -22,21 +22,44 @@ export interface SportWithCount {
   icon?: React.ReactNode;
 }
 
+// DODATO: currentLeague prop
 interface SidebarContentProps {
   sports: SportWithCount[];
   onLinkClick?: () => void;
+  currentLeague?: string;
 }
 
-// 1. REUSABLE CORE COMPONENT (Used in both Desktop Sidebar and Mobile Sheet)
-export function SidebarContent({ sports, onLinkClick }: SidebarContentProps) {
+// 1. REUSABLE CORE COMPONENT
+export function SidebarContent({ sports, onLinkClick, currentLeague }: SidebarContentProps) {
   const [expandedSports, setExpandedSports] = useState<Record<string, boolean>>({});
   const [expandedCountries, setExpandedCountries] = useState<Record<string, boolean>>({});
 
+  // DODATO: Resetuj navigaciju kada se vratimo na "SVI MEČEVI" (nema currentLeague)
+  useEffect(() => {
+    if (!currentLeague) {
+      setExpandedCountries({});
+      // Ako želimo da fudbal uvek bude otvoren po defaultu kada se vratimo na početnu
+      if (sports.length > 0) {
+        setExpandedSports({ [sports[0].name]: true });
+      } else {
+        setExpandedSports({});
+      }
+    }
+  }, [currentLeague, sports]);
+
+  // IZMENJENO: Accordion logika (otvaranje jednog sporta zatvara druge i zaboravlja države)
   const toggleSport = (sportName: string) => {
-    setExpandedSports((prev) => ({
-      ...prev,
-      [sportName]: !prev[sportName],
-    }));
+    setExpandedSports((prev) => {
+      // Ako je sport već otvoren, samo ga zatvori
+      if (prev[sportName]) {
+        return { ...prev, [sportName]: false };
+      }
+      // Ako otvaramo NOVI sport:
+      else {
+        setExpandedCountries({}); // Resetuj (zaboravi) otvorene države
+        return { [sportName]: true }; // Otvori samo ovaj sport, zatvori ostale
+      }
+    });
   };
 
   const toggleCountry = (sportName: string, countryName: string) => {
@@ -105,7 +128,8 @@ export function SidebarContent({ sports, onLinkClick }: SidebarContentProps) {
                             </div>
                             <ChevronDown
                               size={14}
-                              className={`transition-transform duration-300 ease-in-out ${isCountryExpanded ? 'rotate-180' : ''}`}
+                              className={`transition-transform duration-300 ease-in-out ${isCountryExpanded ? 'rotate-180' : ''
+                                }`}
                             />
                           </button>
 
@@ -117,17 +141,25 @@ export function SidebarContent({ sports, onLinkClick }: SidebarContentProps) {
                             <div className="overflow-hidden">
                               <ul className="pl-3 pr-2 pb-1 space-y-0.5 border-l-2 border-slate-100 dark:border-slate-800 ml-4">
                                 {country.leagues && country.leagues.length > 0 ? (
-                                  country.leagues.map((league) => (
-                                    <li key={league.id}>
-                                      <Link
-                                        href={`/?league=${league.slug}`}
-                                        onClick={() => onLinkClick?.()}
-                                        className="flex justify-between items-center text-xs text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 py-1.5 px-2 rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                                      >
-                                        <span className="truncate">{league.name}</span>
-                                      </Link>
-                                    </li>
-                                  ))
+                                  country.leagues.map((league) => {
+                                    // Highlight if this is the currently selected league
+                                    const isActive = currentLeague === league.slug;
+
+                                    return (
+                                      <li key={league.id}>
+                                        <Link
+                                          href={`/?league=${league.slug}`}
+                                          onClick={() => onLinkClick?.()}
+                                          className={`flex justify-between items-center text-xs py-1.5 px-2 rounded transition-colors ${isActive
+                                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold'
+                                              : 'text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                            }`}
+                                        >
+                                          <span className="truncate">{league.name}</span>
+                                        </Link>
+                                      </li>
+                                    );
+                                  })
                                 ) : (
                                   <li className="text-xs text-slate-400 py-1 px-2 italic">
                                     Nema liga...
@@ -154,12 +186,14 @@ export function SidebarContent({ sports, onLinkClick }: SidebarContentProps) {
   );
 }
 
+// DODATO: currentLeague prop i ovde
 interface LeftSidebarProps {
   sports: SportWithCount[];
+  currentLeague?: string;
 }
 
 // 2. DESKTOP WRAPPER
-export default function LeftSidebar({ sports }: LeftSidebarProps) {
+export default function LeftSidebar({ sports, currentLeague }: LeftSidebarProps) {
   return (
     <aside className="hidden lg:flex flex-col h-[calc(100vh-80px)] border-r border-border bg-background sticky top-[80px]">
       <div className="p-4 border-b border-border">
@@ -169,8 +203,8 @@ export default function LeftSidebar({ sports }: LeftSidebarProps) {
         </h2>
       </div>
       <div className="flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {/* Reusing the core logic */}
-        <SidebarContent sports={sports} />
+        {/* Prosleđujemo currentLeague dole u core komponentu */}
+        <SidebarContent sports={sports} currentLeague={currentLeague} />
       </div>
     </aside>
   );

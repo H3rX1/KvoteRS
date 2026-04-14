@@ -28,7 +28,8 @@ export interface MatchWithOdds {
   away_team: string;
   league: string;
   commence_time: number;
-  all_odds: OddEntity[]; // Contains all 13 possible bookie odds for this match
+  slug: string; // <-- OVO JE NOVO DODATO!
+  all_odds: OddEntity[];
 }
 
 // New interfaces for Countries and Leagues hierarchy
@@ -146,5 +147,30 @@ export async function getActiveLeaguesGroupedByCountry(): Promise<CountryWithLea
     }
 
     return [];
+  }
+}
+
+/**
+ * Fetches a single match and all its odds by ID.
+ */
+export async function getMatchWithAllOddsBySlug(matchSlug: string): Promise<MatchWithOdds | null> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_match_with_all_odds_by_slug', { p_match_slug: matchSlug });
+
+    if (error) {
+      console.error('RPC Error fetching single match by slug:', error.message);
+      return null;
+    }
+
+    // RPC vraća niz, ali nama treba samo taj jedan meč
+    if (data && data.length > 0) {
+      return data[0] as MatchWithOdds;
+    }
+
+    return null;
+  } catch (err) {
+    console.error('Unexpected error in getMatchWithAllOddsBySlug:', err);
+    return null;
   }
 }
