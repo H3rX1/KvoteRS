@@ -75,6 +75,9 @@ export function SidebarContent({ sports, onLinkClick, currentLeague }: SidebarCo
       {sports.map((sport) => {
         const isSportExpanded = !!expandedSports[sport.name];
 
+        // DODATO: Generisanje URL-friendly imena sporta (npr. "Fudbal" -> "fudbal", "Mali Fudbal" -> "mali-fudbal")
+        const sportSlug = sport.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
         return (
           <div key={sport.name} className="flex flex-col">
             {/* --- Level 1: SPORT --- */}
@@ -148,11 +151,12 @@ export function SidebarContent({ sports, onLinkClick, currentLeague }: SidebarCo
                                     return (
                                       <li key={league.id}>
                                         <Link
-                                          href={`/?league=${league.slug}`}
+                                          // IZMENJENO: Novi SEO URL format!
+                                          href={`/${sportSlug}/leagues/${league.slug}`}
                                           onClick={() => onLinkClick?.()}
                                           className={`flex justify-between items-center text-xs py-1.5 px-2 rounded transition-colors ${isActive
-                                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold'
-                                              : 'text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold'
+                                            : 'text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                                             }`}
                                         >
                                           <span className="truncate">{league.name}</span>

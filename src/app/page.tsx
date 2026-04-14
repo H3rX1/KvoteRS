@@ -2,13 +2,8 @@ export const dynamic = 'force-dynamic';
 import Header from '@/components/layout/header';
 import LeftSidebar from '@/components/layout/left-sidebar';
 import MatchCard from '@/components/match-card';
+import BetSlip from '@/components/bet-slip'; // <-- Uvozimo komponentu
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 
 import {
   getMatchesWithGroupedOdds,
@@ -61,7 +56,7 @@ export default async function Home({ searchParams }: HomeProps) {
     <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
       <Header sports={sportsWithCounts} currentLeague={leagueSlug} />
 
-      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[360px_1fr] xl:grid-cols-[360px_1fr_320px]">
+      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[360px_1fr] xl:grid-cols-[360px_1fr_auto]">
 
         <LeftSidebar sports={sportsWithCounts} currentLeague={leagueSlug} />
 
@@ -81,22 +76,8 @@ export default async function Home({ searchParams }: HomeProps) {
           </ScrollArea>
         </main>
 
-        <aside className="hidden xl:block border-l border-border">
-          <div className="sticky top-[100px] p-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline text-lg uppercase text-primary">
-                  Bet Slip
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mt-4 text-center text-muted-foreground">
-                  Your bet slip is empty.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </aside>
+        {/* Ubacili smo komponentu ovde i obrisali hardkodovani deo */}
+        <BetSlip />
 
       </div>
     </div>
