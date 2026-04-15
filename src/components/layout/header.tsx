@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link'; // <-- Dodali smo import za Link
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Activity, Menu, Home } from 'lucide-react'; // <-- Dodali smo Home ikonicu
+import { Activity, Menu, Globe } from 'lucide-react';
 
 // Import the unified SidebarContent and Type from left-sidebar
 import { SidebarContent, type SportWithCount } from './left-sidebar';
@@ -22,8 +22,6 @@ interface HeaderProps {
 
 export default function Header({ sports, currentLeague }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
-
-
 
   return (
     <header className="sticky top-0 z-10 flex h-20 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -47,17 +45,14 @@ export default function Header({ sports, currentLeague }: HeaderProps) {
                 </SheetTitle>
               </SheetHeader>
               <div className="flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {/* Reusing the exact same SidebarContent. Passing onLinkClick to close Sheet on selection */}
                 <SidebarContent sports={sports} onLinkClick={() => setIsOpen(false)} currentLeague={currentLeague} />
               </div>
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* --- IZMENJEN DEO: Logo i dugme --- */}
         <div className="flex items-center gap-6">
-
-          {/* 1. Klik na logo sada vodi na početnu stranu */}
+          {/* Logo uvek vodi na Home (/) */}
           <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
             <span className="text-3xl">📈</span>
             <h1 className="font-headline text-2xl font-bold uppercase tracking-wider text-primary">
@@ -65,16 +60,14 @@ export default function Header({ sports, currentLeague }: HeaderProps) {
             </h1>
           </Link>
 
-          {/* 2. Eksplicitno dugme za sve mečeve */}
-          <Link href="/">
+          {/* Dugme "SVI MEČEVI" sada vodi na /svi-mecevi */}
+          <Link href="/svi-mecevi">
             <Button variant="secondary" size="sm" className="hidden sm:flex font-semibold tracking-wide">
-              <Home className="w-4 h-4 mr-2" />
+              <Globe className="w-4 h-4 mr-2" />
               SVI MEČEVI
             </Button>
           </Link>
-
         </div>
-        {/* --- KRAJ IZMENJENOG DELA --- */}
 
       </div>
     </header>

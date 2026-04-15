@@ -174,3 +174,20 @@ export async function getMatchWithAllOddsBySlug(matchSlug: string): Promise<Matc
     return null;
   }
 }
+
+
+export async function getMatchesWithGroupedOddsBySport(sportSlug: string): Promise<MatchWithOdds[]> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_grouped_matches_with_odds_by_sport', { p_sport_slug: sportSlug });
+
+    if (error) {
+      console.error('RPC Error fetching matches by sport:', error.message);
+      return [];
+    }
+    return data as MatchWithOdds[];
+  } catch (err) {
+    console.error('Unexpected error in getMatchesWithGroupedOddsBySport:', err);
+    return [];
+  }
+}

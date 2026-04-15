@@ -111,6 +111,15 @@ export function SidebarContent({ sports, onLinkClick, currentLeague }: SidebarCo
             >
               <div className="overflow-hidden">
                 <div className="pl-3 pr-2 pb-2 space-y-1 border-l-2 border-slate-100 dark:border-slate-800 ml-4">
+                  <div className="flex flex-col mb-1">
+                    <Link
+                      href={`/${sportSlug}`}
+                      onClick={() => onLinkClick?.()}
+                      className="flex items-center gap-2 w-full py-1.5 px-2 rounded-md transition-colors duration-200 text-primary font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 bg-primary/5 border border-primary/10">
+                      <span className="w-4 h-4 flex items-center justify-center text-xs">⭐</span>
+                      <span className="text-sm">Svi mečevi</span>
+                    </Link>
+                  </div>
                   {sport.countries && sport.countries.length > 0 ? (
                     sport.countries.map((country) => {
                       const countryKey = `${sport.name}-${country.name}`;
