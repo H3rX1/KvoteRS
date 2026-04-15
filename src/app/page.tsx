@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic';
 import Header from '@/components/layout/header';
 import LeftSidebar from '@/components/layout/left-sidebar';
 import MatchCard from '@/components/match-card';
-import BetSlip from '@/components/bet-slip'; // <-- Uvozimo komponentu
+import BetSlip from '@/components/bet-slip';
+import BetSlipMobile from '@/components/bet-slip-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import {
@@ -78,7 +79,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* Ubacili smo komponentu ovde i obrisali hardkodovani deo */}
         <BetSlip />
-
+        <BetSlipMobile />
       </div>
     </div>
   );

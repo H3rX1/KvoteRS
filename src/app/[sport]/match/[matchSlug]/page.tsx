@@ -9,6 +9,7 @@ import Header from '@/components/layout/header';
 import LeftSidebar from '@/components/layout/left-sidebar';
 import OddsTableClient from '@/components/odds-table';
 import BetSlip from '@/components/bet-slip';
+import BetSlipMobile from '@/components/bet-slip-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -71,10 +72,9 @@ export default async function MatchPage({ params }: MatchPageProps) {
         countries: countriesData
     }));
 
-    // 4. Pametno generisanje sluga
+    // Pametno generisanje sluga
     let correctLeagueSlug = createCleanLeagueSlug(match.league);
 
-    // I dalje pokušavamo da nađemo 100% tačan slug iz baze kao prvi izbor
     for (const country of countriesData) {
         const foundLeague = country.leagues?.find((l) => l.name === match.league);
         if (foundLeague && foundLeague.slug) {
@@ -93,62 +93,67 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
                 <LeftSidebar sports={sportsWithCounts} />
 
-                <main className="flex-1 min-w-0 bg-slate-50/30 dark:bg-background/50">
+                {/* IZMENA 1: Dodato overflow-x-hidden da spreči horizontalni skrol celog ekrana */}
+                <main className="flex-1 min-w-0 bg-slate-50/30 dark:bg-background/50 overflow-x-hidden">
                     <ScrollArea className="h-[calc(100vh-80px)] w-full">
                         <div className="p-4 md:p-6 lg:p-8 w-full min-w-0">
 
                             <div className="max-w-5xl mx-auto space-y-6 w-full min-w-0">
+
                                 {/* BREADCRUMBS */}
-                                <nav className="flex items-center text-sm text-muted-foreground whitespace-nowrap overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden">
-                                    <Link href="/" className="hover:text-primary transition-colors flex items-center gap-1.5">
+                                {/* IZMENA 2: Ograničena maksimalna širina teksta u breadcrumbs elementima da bi truncate radio */}
+                                <nav className="flex items-center text-sm text-muted-foreground whitespace-nowrap overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden w-full">
+                                    <Link href="/" className="hover:text-primary transition-colors flex items-center gap-1.5 shrink-0">
                                         <Home className="w-4 h-4" />
                                         <span className="hidden sm:inline">Početna</span>
                                     </Link>
                                     <ChevronRight className="w-4 h-4 mx-1 flex-shrink-0" />
 
-                                    <Link href={`/${sport}`} className="hover:text-primary transition-colors capitalize">
+                                    <Link href={`/${sport}`} className="hover:text-primary transition-colors capitalize shrink-0">
                                         {sport.replace(/-/g, ' ')}
                                     </Link>
                                     <ChevronRight className="w-4 h-4 mx-1 flex-shrink-0" />
 
                                     <Link
                                         href={`/${sport}/leagues/${correctLeagueSlug}`}
-                                        className="hover:text-primary transition-colors truncate max-w-[150px] sm:max-w-none"
+                                        className="hover:text-primary transition-colors truncate max-w-[120px] sm:max-w-[250px]"
                                     >
                                         {match.league}
                                     </Link>
                                     <ChevronRight className="w-4 h-4 mx-1 flex-shrink-0" />
 
-                                    <span className="font-medium text-foreground truncate">
+                                    <span className="font-medium text-foreground truncate max-w-[120px] sm:max-w-[300px]">
                                         {match.home_team} vs {match.away_team}
                                     </span>
                                 </nav>
 
                                 {/* ZAGLAVLJE MEČA (Hero sekcija) */}
                                 <Card className="overflow-hidden w-full min-w-0 border-border/60 shadow-sm bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/50">
-                                    <CardContent className="p-6 sm:p-8 w-full min-w-0">
-                                        <div className="flex flex-col items-center justify-center text-center space-y-6 w-full min-w-0">
+                                    <CardContent className="p-4 sm:p-8 w-full min-w-0">
+                                        <div className="flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 w-full min-w-0">
+
                                             {/* Datum i Liga */}
-                                            <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground font-medium">
-                                                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                                                    <Trophy className="w-4 h-4 text-primary" />
-                                                    {match.league}
+                                            {/* IZMENA 3: Ograničena širina bedža za ligu kako se ne bi probio kontejner */}
+                                            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm text-muted-foreground font-medium w-full min-w-0">
+                                                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full max-w-full">
+                                                    <Trophy className="w-4 h-4 text-primary shrink-0" />
+                                                    <span className="truncate">{match.league}</span>
                                                 </div>
-                                                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                                                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full shrink-0">
                                                     <CalendarDays className="w-4 h-4" />
                                                     {format(matchDate, 'dd. MMMM yyyy. • HH:mm')}
                                                 </div>
                                             </div>
 
                                             {/* Timovi (Imena) */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center w-full gap-4 sm:gap-6 min-w-0">
-                                                <h2 className="text-3xl sm:text-3xl md:text-4xl font-headline font-bold text-center sm:text-right break-words tracking-tight w-full min-w-0">
+                                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center w-full gap-2 sm:gap-6 min-w-0">
+                                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline font-bold text-center sm:text-right break-words hyphens-auto tracking-tight w-full min-w-0">
                                                     {match.home_team}
                                                 </h2>
                                                 <div className="text-slate-400 font-semibold text-lg sm:text-xl px-2 sm:px-4 text-center shrink-0">
                                                     VS
                                                 </div>
-                                                <h2 className="text-3xl sm:text-3xl md:text-4xl font-headline font-bold text-center sm:text-left break-words tracking-tight w-full min-w-0">
+                                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline font-bold text-center sm:text-left break-words hyphens-auto tracking-tight w-full min-w-0">
                                                     {match.away_team}
                                                 </h2>
                                             </div>
@@ -163,7 +168,9 @@ export default async function MatchPage({ params }: MatchPageProps) {
                                         Uporedi Kvote
                                     </h3>
 
-                                    <OddsTableClient match={match} />
+                                    <div className="w-full min-w-0 overflow-x-hidden rounded-md">
+                                        <OddsTableClient match={match} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -172,7 +179,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
                 {/* DESNI SIDEBAR: BET SLIP */}
                 <BetSlip />
-
+                <BetSlipMobile />
             </div>
         </div>
     );

@@ -7,6 +7,7 @@ import Header from '@/components/layout/header';
 import LeftSidebar from '@/components/layout/left-sidebar';
 import MatchCard from '@/components/match-card';
 import BetSlip from '@/components/bet-slip';
+import BetSlipMobile from '@/components/bet-slip-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import {
@@ -102,7 +103,7 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
                 </main>
 
                 <BetSlip />
-
+                <BetSlipMobile />
             </div>
         </div>
     );
