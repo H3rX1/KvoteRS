@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { OddEntity } from '@/lib/supabase'; // <-- DODALI SMO IMPORT
 
 export interface BetSlipItem {
     id: string; // ID meča
     homeTeam: string;
     awayTeam: string;
     selection: '1' | 'X' | '2'; // Šta je odigrano
-    oddValue: number; // Kvota
-    bookie: string; // Kladionica
+    oddValue: number; // Kvota u odabranoj kladionici
+    bookie: string; // Odabrana kladionica
+    all_odds: OddEntity[]; // <-- KLJUČNA IZMENA: Pamtimo sve kvote svih kladionica za ovaj meč!
 }
 
 interface BetSlipState {

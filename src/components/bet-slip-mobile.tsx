@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Receipt, Trash2, X, Calculator } from 'lucide-react';
+import Link from "next/link";
 import {
     Sheet,
     SheetContent,
@@ -107,12 +108,14 @@ export default function BetSlipMobile() {
 
                         {/* DUGME ZA KALKULACIJU (Fiksirano na dnu) */}
                         {isMounted && items.length > 0 && (
-                            <div className="p-4 border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
-                                <Button className="w-full font-bold tracking-wide shadow-sm h-12" size="lg">
-                                    <Calculator className="w-5 h-5 mr-2" />
-                                    KALKULACIJA
-                                </Button>
-                            </div>
+                            <Link href="/kalkulacija">
+                                <div className="p-4 border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+                                    <Button className="w-full font-bold tracking-wide shadow-sm h-12" size="lg">
+                                        <Calculator className="w-5 h-5 mr-2" />
+                                        KALKULACIJA
+                                    </Button>
+                                </div>
+                            </Link>
                         )}
                     </div>
                 </SheetContent>

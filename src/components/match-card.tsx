@@ -1,4 +1,4 @@
-'use client'; // <-- Pretvaramo u klijentsku komponentu kako bi primala klikove
+'use client';
 
 import React from 'react';
 import type { MatchWithOdds } from '@/lib/supabase';
@@ -20,7 +20,9 @@ import {
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { useBetSlipStore } from '@/store/use-bet-slip'; // <-- Uvozimo Zustand store
+import { useRouter } from 'next/navigation'; // <-- Dodato za rutiranje klikom na background
+import { ChevronRight } from 'lucide-react'; // <-- Dodato za ikonicu u footeru
+import { useBetSlipStore } from '@/store/use-bet-slip';
 
 interface MatchCardProps {
   match: MatchWithOdds;
@@ -39,17 +41,15 @@ function getBestOdds(match: MatchWithOdds) {
 }
 
 export default function MatchCard({ match }: MatchCardProps) {
+  const router = useRouter(); // <-- Inicijalizujemo router
   const bestOdds = getBestOdds(match);
   const sportSlug = match.sport ? match.sport.toLowerCase() : 'sport';
 
-  // Ako baza već šalje slug, koristimo ga, inače ga generišemo (kao fallback)
   const matchSlug = match.slug || `${match.home_team}-${match.away_team}-${match.id}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const matchUrl = `/${sportSlug}/match/${matchSlug}`;
 
-  // Povezujemo se sa tiketom u localStorage-u
   const { items, addItem, removeItem } = useBetSlipStore();
 
-  // Logika za sportove sa 2 ishoda (Sakrivamo kolonu 'X')
   const twoWaySports = ['tenis', 'odbojka', 'e-sports', 'stoni tenis', 'pikado', 'snuker'];
   const isTwoWaySport = twoWaySports.includes(sportSlug);
 
@@ -68,7 +68,7 @@ export default function MatchCard({ match }: MatchCardProps) {
     };
 
     addBestBookie('odd_1');
-    if (!isTwoWaySport) addBestBookie('odd_x'); // Preskačemo 'X' ako je tenis
+    if (!isTwoWaySport) addBestBookie('odd_x');
     addBestBookie('odd_2');
 
     for (const odd of match.all_odds) {
@@ -82,7 +82,6 @@ export default function MatchCard({ match }: MatchCardProps) {
     return selectedBookies.slice(0, 3);
   })();
 
-  // Logika klika (Ista kao na detaljima meča)
   const handleToggleBet = (bookie: string, selection: '1' | 'X' | '2', oddValue: number) => {
     const isAlreadyAdded = items.some(
       (item) => item.id === match.id && item.selection === selection && item.bookie === bookie
@@ -98,12 +97,13 @@ export default function MatchCard({ match }: MatchCardProps) {
         selection,
         oddValue,
         bookie,
+        all_odds: match.all_odds,
       });
     }
   };
 
   return (
-    <Card className="overflow-hidden border-border/50 transition-shadow hover:shadow-md">
+    <Card className="overflow-hidden border-border/50 transition-shadow hover:shadow-md flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-xl text-foreground hover:text-primary transition-colors">
@@ -121,34 +121,34 @@ export default function MatchCard({ match }: MatchCardProps) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="p-0 sm:p-4 sm:pt-0">
-        <div className="overflow-x-auto rounded-md sm:border sm:border-border/50">
+      {/* KLIKABILAN BACKGROUND: onClick event na CardContent preusmerava na matchUrl */}
+      <CardContent
+        className="p-0 sm:p-4 sm:pt-0 cursor-pointer group"
+        onClick={() => router.push(matchUrl)}
+      >
+        <div className="overflow-x-auto rounded-md sm:border sm:border-border/50 transition-colors group-hover:border-primary/20">
           <Table>
             <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
-              <TableRow>
-                <TableHead className="w-[120px] sm:w-[150px] font-semibold">Kladionica</TableHead>
-                <TableHead className="text-center font-bold">1</TableHead>
-
-                {/* Ako nije sport sa 2 ishoda, crtamo 'X' zaglavlje */}
-                {!isTwoWaySport && <TableHead className="text-center font-bold">X</TableHead>}
-
-                <TableHead className="text-center font-bold">2</TableHead>
+              <TableRow className="hover:bg-slate-50 dark:hover:bg-slate-900/50 border-b-border/50">
+                <TableHead className="w-[120px] sm:w-[150px] font-semibold text-slate-500">Kladionica</TableHead>
+                <TableHead className="text-center font-bold text-slate-500">1</TableHead>
+                {!isTwoWaySport && <TableHead className="text-center font-bold text-slate-500">X</TableHead>}
+                <TableHead className="text-center font-bold text-slate-500">2</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {displayedOdds.map((oddEntry) => {
-                // Proveravamo da li je korisnik u OVOJ kladionici odabrao OVAJ meč
                 const selectedInThisBookie = items.find(
                   (item) => item.id === match.id && item.bookie === oddEntry.bookie_name
                 );
 
                 return (
-                  <TableRow key={oddEntry.bookie_name} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                  // Uklonili smo hover background sa reda da bi se video hover efekat celog kontejnera
+                  <TableRow key={oddEntry.bookie_name} className="border-b-border/50 hover:bg-transparent">
                     <TableCell className="font-semibold capitalize text-foreground text-xs sm:text-sm">
                       {oddEntry.bookie_name}
                     </TableCell>
 
-                    {/* KVOTA 1 */}
                     <TableCell className="text-center p-1 sm:p-2">
                       <OddButton
                         odd={oddEntry.odd_1}
@@ -158,7 +158,6 @@ export default function MatchCard({ match }: MatchCardProps) {
                       />
                     </TableCell>
 
-                    {/* KVOTA X (Sakrivena za Tenis, Odbojku...) */}
                     {!isTwoWaySport && (
                       <TableCell className="text-center p-1 sm:p-2">
                         <OddButton
@@ -170,7 +169,6 @@ export default function MatchCard({ match }: MatchCardProps) {
                       </TableCell>
                     )}
 
-                    {/* KVOTA 2 */}
                     <TableCell className="text-center p-1 sm:p-2">
                       <OddButton
                         odd={oddEntry.odd_2}
@@ -186,18 +184,29 @@ export default function MatchCard({ match }: MatchCardProps) {
           </Table>
         </div>
       </CardContent>
+
+      {/* FOOTER - OSTALE KVOTE */}
+      <div className="mt-auto border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/30 p-2 sm:p-3">
+        <Link
+          href={matchUrl}
+          className="flex w-full items-center justify-center gap-1.5 rounded-md py-2 text-sm font-semibold text-primary transition-all hover:bg-slate-100 dark:hover:bg-slate-800/80 active:scale-[0.98]"
+        >
+          OSTALE KVOTE <ChevronRight className="w-4 h-4" />
+        </Link>
+      </div>
+
     </Card>
   );
 }
 
-// Ažuriran OddButton koji prima isSelected i onClick metode
 const OddButton = ({ odd, isBest, isSelected, onClick }: { odd: number | null; isBest: boolean; isSelected: boolean; onClick: () => void }) => {
   if (odd === null) return <span className="text-muted-foreground/50">-</span>;
 
   return (
     <button
       onClick={(e) => {
-        e.preventDefault(); // Sprečavamo propagaciju ako se nađe unutar Linka
+        e.preventDefault();
+        e.stopPropagation(); // <-- OVO JE KLJUČNO! Sprečava da klik na kvotu preusmeri korisnika na drugu stranicu.
         onClick();
       }}
       className={cn(

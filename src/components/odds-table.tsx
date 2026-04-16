@@ -51,6 +51,7 @@ export default function OddsTableClient({ match }: OddsTableClientProps) {
                 selection,
                 oddValue,
                 bookie,
+                all_odds: match.all_odds,
             });
         }
     };

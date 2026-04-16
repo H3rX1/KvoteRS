@@ -191,3 +191,52 @@ export async function getMatchesWithGroupedOddsBySport(sportSlug: string): Promi
     return [];
   }
 }
+
+export async function searchMatches(searchQuery: string) {
+  if (!searchQuery || searchQuery.trim().length < 2) return [];
+
+  // Formatiramo pretragu za slug (npr. zvezda partizan -> zvezda-partizan)
+  const slugQuery = searchQuery.trim().toLowerCase().replace(/\s+/g, '-');
+
+  // 1. Prvo tražimo odgovarajuće slug-ove u match_links tabeli
+  const { data: linksData, error: linksError } = await supabase
+    .from('match_links')
+    .select('superbet_id, slug')
+    .ilike('slug', `%${slugQuery}%`)
+    .limit(8);
+
+  if (linksError) {
+    console.error("Greška pri pretrazi (match_links):", linksError.message, linksError.details);
+    return [];
+  }
+
+  if (!linksData || linksData.length === 0) return [];
+
+  // Izvlačimo sve superbet_id vrednosti (Naš kostur)
+  const superbetIds = linksData.map(link => link.superbet_id);
+
+  // 2. Sada povlačimo prave podatke o meču iz tabele 'matches' koristeći superbet_id
+  const { data: matchesData, error: matchesError } = await supabase
+    .from('matches')
+    .select('id, home_team, away_team, sport, league, commence_time')
+    .in('id', superbetIds);
+
+  if (matchesError) {
+    console.error("Greška pri pretrazi (matches):", matchesError.message, matchesError.details);
+    return [];
+  }
+
+  // 3. Spajamo rezultate (Vraćamo slug UI-ju za navigaciju)
+  const results = matchesData.map(match => {
+    const link = linksData.find(l => l.superbet_id === match.id);
+    return {
+      ...match,
+      slug: link ? link.slug : null
+    };
+  });
+
+  // 4. Sortiramo po vremenu početka (najskoriji prvo)
+  results.sort((a, b) => a.commence_time - b.commence_time);
+
+  return results;
+}

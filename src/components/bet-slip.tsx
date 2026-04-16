@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronRight, ChevronLeft, Receipt, Trash2, X, Calculator } from 'lucide-react';
 import { useBetSlipStore } from '@/store/use-bet-slip';
+import Link from "next/link";
 
 export default function BetSlip() {
     const [isOpen, setIsOpen] = useState(true);
@@ -115,12 +116,14 @@ export default function BetSlip() {
 
                         {/* DUGME ZA KALKULACIJU (Fiksirano na dnu tiketa) */}
                         {isMounted && items.length > 0 && (
-                            <div className="p-4 border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
-                                <Button className="w-full font-bold tracking-wide shadow-sm h-12" size="lg">
-                                    <Calculator className="w-5 h-5 mr-2" />
-                                    KALKULACIJA
-                                </Button>
-                            </div>
+                            <Link href="/kalkulacija">
+                                <div className="p-4 border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+                                    <Button className="w-full font-bold tracking-wide shadow-sm h-12" size="lg">
+                                        <Calculator className="w-5 h-5 mr-2" />
+                                        KALKULACIJA
+                                    </Button>
+                                </div>
+                            </Link>
                         )}
 
                     </Card>
