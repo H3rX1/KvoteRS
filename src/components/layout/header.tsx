@@ -58,13 +58,13 @@ export default function Header({ sports, currentLeague }: HeaderProps) {
           </Link>
         </div>
 
-        {/* Dugme SVI MEČEVI - sada uvek vidljivo, ali prilagođeno na mobilnom */}
-        <Link href="/svi-mecevi" className="flex-shrink-0">
-          <Button variant="secondary" size="sm" className="h-9 px-2 sm:px-4 font-semibold tracking-wide">
+        {/* ISPRAVLJENO: Korišćenje 'asChild' kako bi izbegli stavljanje <button> u <a> tag */}
+        <Button asChild variant="secondary" size="sm" className="h-9 px-2 sm:px-4 font-semibold tracking-wide flex-shrink-0">
+          <Link href="/svi-mecevi">
             <Globe className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">SVI MEČEVI</span>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
 
       </div>
     </header>

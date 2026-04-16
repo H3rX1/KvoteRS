@@ -24,23 +24,14 @@ interface MatchPageProps {
     params: Promise<{ sport: string; matchSlug: string }>;
 }
 
-// Pomoćna funkcija koja sigurno kreira čist slug tako što odbacuje prefiks države
+// Pomoćna funkcija koja sigurno kreira čist slug u novom formatu {drzava}-{liga}
 function createCleanLeagueSlug(leagueName: string): string {
-    let cleanName = leagueName;
-
-    // Pronalazimo prvi " - " i sečemo samo njega i ono pre njega (državu)
-    const separatorIndex = cleanName.indexOf(' - ');
-    if (separatorIndex !== -1) {
-        // Uzimamo sve što dolazi NAKON " - " (plus 3 karaktera za sam " - ")
-        cleanName = cleanName.substring(separatorIndex + 3);
-    }
-
-    // Pretvaranje u slug
-    return cleanName
+    // Sada NE sečemo string kod znaka " - ", već ceo string (i državu i ligu) pretvaramo u slug
+    return leagueName
         .toLowerCase()
         // Zameni specifična naša slova
         .replace(/š/g, 's').replace(/đ/g, 'dj').replace(/ž/g, 'z').replace(/č/g, 'c').replace(/ć/g, 'c')
-        // Ukloni sve što nije slovo ili broj
+        // Ukloni sve što nije slovo ili broj (ovo će pretvoriti i onaj razmak-crtica-razmak u običnu crticu)
         .replace(/[^a-z0-9]+/g, '-')
         // Ukloni crtice sa početka i kraja
         .replace(/(^-|-$)+/g, '');
@@ -75,6 +66,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
     // Pametno generisanje sluga
     let correctLeagueSlug = createCleanLeagueSlug(match.league);
 
+    // I dalje pokušavamo da nađemo 100% tačan slug iz baze kao prvi izbor
     for (const country of countriesData) {
         const foundLeague = country.leagues?.find((l) => l.name === match.league);
         if (foundLeague && foundLeague.slug) {
@@ -93,7 +85,6 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
                 <LeftSidebar sports={sportsWithCounts} />
 
-                {/* IZMENA 1: Dodato overflow-x-hidden da spreči horizontalni skrol celog ekrana */}
                 <main className="flex-1 min-w-0 bg-slate-50/30 dark:bg-background/50 overflow-x-hidden">
                     <ScrollArea className="h-[calc(100vh-80px)] w-full">
                         <div className="p-4 md:p-6 lg:p-8 w-full min-w-0">
@@ -101,7 +92,6 @@ export default async function MatchPage({ params }: MatchPageProps) {
                             <div className="max-w-5xl mx-auto space-y-6 w-full min-w-0">
 
                                 {/* BREADCRUMBS */}
-                                {/* IZMENA 2: Ograničena maksimalna širina teksta u breadcrumbs elementima da bi truncate radio */}
                                 <nav className="flex items-center text-sm text-muted-foreground whitespace-nowrap overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden w-full">
                                     <Link href="/" className="hover:text-primary transition-colors flex items-center gap-1.5 shrink-0">
                                         <Home className="w-4 h-4" />
@@ -133,7 +123,6 @@ export default async function MatchPage({ params }: MatchPageProps) {
                                         <div className="flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 w-full min-w-0">
 
                                             {/* Datum i Liga */}
-                                            {/* IZMENA 3: Ograničena širina bedža za ligu kako se ne bi probio kontejner */}
                                             <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm text-muted-foreground font-medium w-full min-w-0">
                                                 <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full max-w-full">
                                                     <Trophy className="w-4 h-4 text-primary shrink-0" />
